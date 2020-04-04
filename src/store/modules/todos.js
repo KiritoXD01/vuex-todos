@@ -1,4 +1,4 @@
-import axios from 'axios';
+import { db } from '@/main';
 
 const state = {
     todos: []
@@ -10,42 +10,61 @@ const getters = {
 
 const actions = {
     async fetchTodos({ commit }) {
-        const response = await axios.get(
-            'https://jsonplaceholder.typicode.com/todos'
-        );
+        let todos = [];
+        await db.collection('todos').get().then((querySnapshot) => {
+            querySnapshot.forEach((todo) => {
+                let todoData = {
+                    id: todo.id,
+                    title: todo.data().title,
+                    completed: todo.data().completed
+                };
+                todos.push(todoData);
+            });
+        });
 
-        commit('setTodos', response.data);
+        commit('setTodos', todos);
     },
     async addTodo({ commit }, title) {
-        const response = await axios.post(
-            'https://jsonplaceholder.typicode.com/todos',
-            { title, completed: false }
-        );
+        let todo = {
+            title: title,
+            completed: false
+        };
 
-        commit('newTodo', response.data);
+        const response = await db.collection('todos').add(todo);
+
+        todo.id = response.id;
+
+        commit('newTodo', todo);
     },
     async deleteTodo({ commit }, id) {
-        await axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`);
+        await db.collection('todos').doc(id).delete();
 
         commit('removeTodo', id);
     },
     async filterTodos({ commit }, e) {
         //Get Selected number
-        const limit = parseInt(e.target.options[e.target.options.selectedIndex].innerText)
+        const limit = parseInt(e.target.options[e.target.options.selectedIndex].innerText);
 
-        const response = await axios.get(
-            `https://jsonplaceholder.typicode.com/todos?_limit=${limit}`
-        );
+        let todos = [];
+        await db.collection('todos').limit(limit).get().then((querySnapshot) => {
+            querySnapshot.forEach((todo) => {
+                let todoData = {
+                    id: todo.id,
+                    title: todo.data().title,
+                    completed: todo.data().completed
+                };
+                todos.push(todoData);
+            });
+        });
 
-        commit('setTodos', response.data);
+        commit('setTodos', todos);
     },
     async updateTodo({ commit }, updTodo) {
-        const response = await axios.put(
-            `https://jsonplaceholder.typicode.com/todos/${updTodo.id}`, 
-            updTodo
-        );
+        await db.collection('todos').doc(updTodo.id).update({
+            completed: updTodo.completed
+        });
 
-        commit('updateTodo', response.data);
+        commit('updateTodo', updTodo);
     }
 };
 
