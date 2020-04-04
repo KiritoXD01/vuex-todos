@@ -4,7 +4,7 @@
         <div class="add">
             <form @submit="onSubmit">
                 <input type="text" v-model="title" placeholder="Add a Title..." />
-                <input type="submit" value="Submit">
+                <input type="submit" value="Submit" :disabled="!title.length > 0">
             </form>
         </div>
     </div>

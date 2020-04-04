@@ -1,4 +1,5 @@
 import { db } from '@/main';
+import Swal from 'sweetalert2';
 
 const state = {
     todos: []
@@ -10,6 +11,16 @@ const getters = {
 
 const actions = {
     async fetchTodos({ commit }) {
+        Swal.fire({
+            title: "Please wait",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            onOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         let todos = [];
         await db.collection('todos').get().then((querySnapshot) => {
             querySnapshot.forEach((todo) => {
@@ -22,9 +33,21 @@ const actions = {
             });
         });
 
+        Swal.close();
+
         commit('setTodos', todos);
     },
     async addTodo({ commit }, title) {
+        Swal.fire({
+            title: "Please wait",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            onOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         let todo = {
             title: title,
             completed: false
@@ -34,14 +57,38 @@ const actions = {
 
         todo.id = response.id;
 
+        Swal.close();
+
         commit('newTodo', todo);
     },
     async deleteTodo({ commit }, id) {
+        Swal.fire({
+            title: "Please wait",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            onOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         await db.collection('todos').doc(id).delete();
+
+        Swal.close();
 
         commit('removeTodo', id);
     },
     async filterTodos({ commit }, e) {
+        Swal.fire({
+            title: "Please wait",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            onOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         //Get Selected number
         const limit = parseInt(e.target.options[e.target.options.selectedIndex].innerText);
 
@@ -57,12 +104,26 @@ const actions = {
             });
         });
 
+        Swal.close();
+
         commit('setTodos', todos);
     },
     async updateTodo({ commit }, updTodo) {
+        Swal.fire({
+            title: "Please wait",
+            allowEscapeKey: false,
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            onOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         await db.collection('todos').doc(updTodo.id).update({
             completed: updTodo.completed
         });
+
+        Swal.close();
 
         commit('updateTodo', updTodo);
     }
